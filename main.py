@@ -1,16 +1,33 @@
-# This is a sample Python script.
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, TextDataset, DataCollatorForLanguageModeling, Trainer, TrainingArguments
 
-# Press Mayús+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+model = GPT2LMHeadModel.from_pretrained('gpt2')
 
+# Tu conjunto de datos
+train_dataset = TextDataset(
+    tokenizer=tokenizer,
+    file_path="ruta_a_tu_archivo.txt",  # Reemplaza con la ruta a tu conjunto de datos
+    block_size=128  # Tamaño de bloque para el texto
+)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+data_collator = DataCollatorForLanguageModeling(
+    tokenizer=tokenizer, mlm=False
+)
 
+training_args = TrainingArguments(
+    output_dir="./gpt2-finetuned",  # Directorio de salida para el modelo entrenado
+    overwrite_output_dir=True,
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    save_steps=1000,
+    save_total_limit=2,
+)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    data_collator=data_collator,
+    train_dataset=train_dataset,
+)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+trainer.train()
